@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <string.h>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -158,7 +159,7 @@ static void files_rm_obj(char* path)
 static inline int path_name_idx(char* path)
 {
     int i;
-    for (i = strlen(path); path[i] != '\\' && path[i] != '/'; i--);
+    for (i = strlen(path); path[i] != '\\' && path[i] != '/' && i >= 0; i--);
     return i;
 }
 
@@ -172,7 +173,10 @@ static char* path_split(char** path)
 void files_rm(char* path)
 {
     char* buff = path_split(&path);
-    chdir(path);
+    if (path != buff)
+    {
+        chdir(path);
+    }
     path = buff;
 #ifdef _WIN32
     files_folder_t ffd;
@@ -218,5 +222,6 @@ int main(int argc, char* argv[])
         }
 
         files_rm(argv[i]);
+        // puts(argv[i]);
     }
 }
