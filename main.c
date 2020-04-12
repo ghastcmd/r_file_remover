@@ -1,28 +1,4 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <assert.h>
-#include <string.h>
-
-#ifdef _WIN32
-#include <Windows.h>
-#include <conio.h>
-
-#include <direct.h>
-#include <AccCtrl.h>
-#include <AclAPI.h>
-
-#else
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-
-#include <unistd.h>
-#include <pthread.h>
-#include <termios.h>
-#include <dirent.h>
-
-#define INIT
-
-#endif
+#include "pch.h"
 
 #ifdef _WIN32
 typedef HANDLE files_dir_t;
@@ -163,6 +139,13 @@ static inline int path_name_idx(char* path)
     return i;
 }
 
+char* path_name(char* path)
+{
+    int i;
+    for (i = strlen(path); path[i] != '\\' && path[i] != '/' && i >= 0; i--);
+    return &path[i + 1];
+}
+
 static char* path_split(char** path)
 {
     int i = path_name_idx(*path);
@@ -206,15 +189,24 @@ void files_rmdir_r(char* path)
     rmdir(path);
 }
 
+void usage(char** argv);
+
 int main(int argc, char* argv[])
 {
+    if (argc <= 1)
+    {
+        fprintf(stderr, "Insuficient arguments.\n");
+        usage(argv);
+        exit(0);
+    }
+
     for (int i = 1; i < argc; i++)
     {
         if (argv[i][0] == '-')
         {
             continue;
         }
-
+        // takes pointer to last char in current argv
         char* loc = &argv[i][strlen(argv[i]) - 1];
         if (*loc == '\\' || *loc == '/')
         {
@@ -222,6 +214,12 @@ int main(int argc, char* argv[])
         }
 
         files_rm(argv[i]);
-        // puts(argv[i]);
     }
+}
+
+void usage(char** argv)
+{
+    printf("Usage:\n\t%s [file to remove]\n", path_name(argv[0]));
+    puts("\tArguments starting with '-' will be ignored");
+    puts("\tAll the exclusions are forced/recursive");
 }
