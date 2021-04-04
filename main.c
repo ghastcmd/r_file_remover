@@ -200,6 +200,13 @@ int main(int argc, char* argv[])
         exit(0);
     }
 
+    for (int i = 0; i < argc; i++)
+    {
+        puts(argv[i]);
+    }
+
+    return 0;
+
     for (int i = 1; i < argc; i++)
     {
         if (argv[i][0] == '-')
